@@ -1,0 +1,9 @@
+#ifndef TESTS_H
+#define TESTS_H
+
+#include <munit.h>
+
+extern MunitSuite getdelim_test_suite;
+extern MunitSuite getline_test_suite;
+
+#endif /* TESTS_H */
