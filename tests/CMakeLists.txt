@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 arnavyc
+# Copyright 2021 arnavyc <arnavyc@outlook.com>
 #
 # SPDX-License-Identifier: 0BSD
 

@@ -1,3 +1,7 @@
+# Copyright 2021 arnavyc <arnavyc@outlook.com>
+#
+# SPDX-License-Identifier: 0BSD
+
 include(FetchContent)
 FetchContent_Declare(munit
   GIT_REPOSITORY https://github.com/nemequ/munit.git

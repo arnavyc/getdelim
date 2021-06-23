@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 arnavyc.
+ * Copyright 2021 arnavyc <arnavyc@outlook.com>
  * SPDX-License-Identifier: 0BSD
  *
  * Licensed under the Zero Clause BSD License. See LICENSE.md file in the
