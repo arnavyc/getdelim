@@ -1,6 +1,6 @@
-# Copyright 2021 arnavyc <arnavyc@outlook.com>
+#Copyright 2021 arnavyc < arnavyc @outlook.com>
 #
-# SPDX-License-Identifier: 0BSD
+#SPDX - License - Identifier : 0BSD
 
 #ifndef TESTS_H
 #define TESTS_H
