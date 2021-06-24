@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2021 arnavyc
+#
+# SPDX-License-Identifier: 0BSD
+
+name: Build and test
+
+on: [push]
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: 'Windows Latest - MSVC'
+            runner: windows-latest
+            build-type: Release
+            cc: cl
+            cxx: cl
+
+          - name: 'Ubuntu 20.04 - GCC'
+            runner: ubuntu-20.04
+            build-type: Release
+            cc: gcc
+            cxx: g++
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v2
+
+      - name: Install CMake and Ninja
+        uses: lukka/get-cmake@v3.20.1
+
+      - name: Setup MSVC environment if Windows
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure CMake project
+        shell: pwsh
+        run: |
+          cmake `
+          -D ADD_GETLINE_EXE:BOOL=1 `
+          -D CMAKE_BUILD_TYPE=${{ matrix.config.build-type }} `
+          -G Ninja `
+          -B build/
+        env:
+          CC: ${{ matrix.config.cc }}
+          CXX: ${{ matrix.config.cxx }}
+
+      - name: Build the project
+        run: cmake --build build/
+
+      - name: Test the project
+        run: ctest -V --test-dir build/ --output-on-failure

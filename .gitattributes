@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2021 arnavyc
+#
+# SPDX-License-Identifier: 0BSD
+
+# All files
+* text=auto
+
+# C/C++ files
+*.c text eol=lf
+*.h text eol=lf
+*.cpp text eol=lf
+*.hpp text eol=lf
+

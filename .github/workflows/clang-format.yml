@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2021 arnavyc
+#
+# SPDX-License-Identifier: 0BSD
+
+name: Check and Autofix C/C++ files with clang-format
+
+on: [push]
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v2
+
+      - name: clang-format lint
+        uses: DoozyX/clang-format-lint-action@v0.11
+        with:
+          extensions: 'c,cpp,h,hpp'
+          inPlace: true
+
+      - uses: EndBug/add-and-commit@v7.1.1
+        with:
+          author_name: Clang-Format Robot
+          author_email: robot@example.com
+          message: 'style: format *.{c,h} files with clang-format'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
