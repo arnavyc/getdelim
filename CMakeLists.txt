@@ -13,6 +13,7 @@ project(getdelim
 
 include(cmake/DefaultConfig.cmake)
 include(BuildType)
+include(CPM)
 
 ####################
 # Section: Options #

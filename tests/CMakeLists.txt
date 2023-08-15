@@ -2,8 +2,9 @@
 #
 # SPDX-License-Identifier: 0BSD
 
-include(DownloadAndUseMunit)
-include(Munit)
+CPMAddPackage("gh:arnavyc/Munit.cmake@0.1.0")
+munit_cmake_init()
+include(DownloadMunitCPM)
 
 add_executable(getdelim_tests main.c getdelim.test.c getline.test.c)
 target_link_libraries(getdelim_tests getdelim munit)
