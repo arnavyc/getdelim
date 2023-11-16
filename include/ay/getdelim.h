@@ -34,7 +34,7 @@
 #if defined(IS_POSIX)
 #include <sys/types.h>
 #elif defined(_MSC_VER)
-#include <BaseTsd.h>
+#include <basetsd.h>
 typedef SSIZE_T ssize_t;
 #else
 typedef ptrdiff_t ssize_t;
@@ -51,18 +51,19 @@ ssize_t getline(char **restrict lineptr, size_t *restrict n,
 
 #define INITIAL_BUFFSZ 128
 
-ssize_t getdelim(char **restrict lineptr, size_t *restrict n, int delimiter,
-                 FILE *restrict stream) {
+static ssize_t
+__getdelim(char **restrict lineptr, size_t *restrict n, int delimiter,
+           FILE *restrict stream) {
+  if (lineptr == NULL || stream == NULL || n == NULL) {
+    errno = EINVAL;
+    return -1;
+  }
+
 #if defined(IS_POSIX)
   flockfile(stream);
 #elif defined(_WIN32)
   _lock_file(stream);
 #endif
-
-  if (lineptr == NULL || stream == NULL || n == NULL) {
-    errno = EINVAL;
-    return -1;
-  }
 
 #if defined(IS_POSIX)
   int c = getc_unlocked(stream);
@@ -79,6 +80,7 @@ ssize_t getdelim(char **restrict lineptr, size_t *restrict n, int delimiter,
   if (*lineptr == NULL) {
     *lineptr = malloc(INITIAL_BUFFSZ);
     if (*lineptr == NULL) {
+      errno = ENOMEM;
       return -1;
     }
     *n = INITIAL_BUFFSZ;
@@ -93,6 +95,7 @@ ssize_t getdelim(char **restrict lineptr, size_t *restrict n, int delimiter,
       }
       char *new_ptr = realloc(*lineptr, new_size);
       if (new_ptr == NULL) {
+        errno = ENOMEM;
         return -1;
       }
       *n = new_size;
@@ -113,14 +116,23 @@ ssize_t getdelim(char **restrict lineptr, size_t *restrict n, int delimiter,
 #endif
   }
 
-#if defined(IS_POSIX)
-  funlockfile(stream);
-#elif defined(_WIN32)
-  _unlock_file(stream);
-#endif
-
   (*lineptr)[pos] = '\0';
   return pos;
+}
+
+ssize_t getdelim(char **restrict lineptr, size_t *restrict n, int delimiter,
+                 FILE *restrict stream) {
+  ssize_t ret = __getdelim(lineptr, n, delimiter, stream);
+#if defined(IS_POSIX)
+  if (stream) {
+    funlockfile(stream);
+  }
+#elif defined(_WIN32)
+  if (stream) {
+    _unlock_file(stream);
+  }
+#endif
+  return ret;
 }
 
 ssize_t getline(char **restrict lineptr, size_t *restrict n,
