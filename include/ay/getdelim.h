@@ -51,9 +51,8 @@ ssize_t getline(char **restrict lineptr, size_t *restrict n,
 
 #define INITIAL_BUFFSZ 128
 
-static ssize_t
-__getdelim(char **restrict lineptr, size_t *restrict n, int delimiter,
-           FILE *restrict stream) {
+static ssize_t __getdelim(char **restrict lineptr, size_t *restrict n,
+                          int delimiter, FILE *restrict stream) {
   if (lineptr == NULL || stream == NULL || n == NULL) {
     errno = EINVAL;
     return -1;
