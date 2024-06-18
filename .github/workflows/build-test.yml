@@ -1,5 +1,3 @@
-# SPDX-FileCopyrightText: 2021 arnavyc
-#
 # SPDX-License-Identifier: 0BSD
 
 name: Build and test
@@ -20,8 +18,8 @@ jobs:
             cc: cl
             cxx: cl
 
-          - name: 'Ubuntu 20.04 - GCC'
-            runner: ubuntu-20.04
+          - name: 'Ubuntu 24.04 - GCC'
+            runner: ubuntu-24.04
             build-type: Release
             cc: gcc
             cxx: g++
