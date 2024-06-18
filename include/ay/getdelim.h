@@ -1,11 +1,4 @@
-/*
- * Copyright 2021 arnavyc.
- * SPDX-License-Identifier: 0BSD
- *
- * Licensed under the Zero Clause BSD License. See LICENSE.md file in the
- * project root, or https://opensource.org/licenses/0BSD for full license
- * information.
- */
+/* SPDX-License-Identifier: 0BSD */
 
 /*
  * To use this single-file library, create a file getdelim.c with the following
