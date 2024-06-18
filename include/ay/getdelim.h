@@ -18,20 +18,10 @@
 #ifndef AY_GETDELIM_H
 #define AY_GETDELIM_H
 
-#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
-#define IS_POSIX
-#endif
-
-#ifdef IS_POSIX
-#define _POSIX_C_SOURCE 200809L
-#endif
-
 #include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 
-#if defined(IS_POSIX)
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <sys/types.h>
 #elif defined(_MSC_VER)
 #include <basetsd.h>
@@ -40,41 +30,43 @@ typedef SSIZE_T ssize_t;
 typedef ptrdiff_t ssize_t;
 #endif
 
-ssize_t getdelim(char **restrict lineptr, size_t *restrict n, int delimiter,
-                 FILE *restrict stream);
-
-ssize_t getline(char **restrict lineptr, size_t *restrict n,
-                FILE *restrict stream);
-
 #ifdef AY_GETDELIM_IMPLEMENTATION
+
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#define _POSIX_C_SOURCE 200809L
+#endif /* defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) */
+
 #include <errno.h>
+#include <stdio.h>
+
+#if defined(_POSIX_C_SOURCE)
+static void ay__flockfile(FILE *stream) { flockfile(stream); }
+static int ay__getc_unlocked(FILE *stream) { return getc_unlocked(stream); }
+static void ay__funlockfile(FILE *stream) { funlockfile(stream); }
+#elif defined(_MSC_VER)
+static void ay__flockfile(FILE *stream) { _lock_file(stream); }
+static int ay__getc_unlocked(FILE *stream) { return _getc_nolock(stream); }
+static void ay__funlockfile(FILE *stream) { _unlock_file(stream); }
+#else
+static void ay__flockfile(FILE *stream) {}
+static int ay__getc_unlocked(FILE *stream) { return getc(stream); }
+static void ay__funlockfile(FILE *stream) {}
+#endif
 
 #define INITIAL_BUFFSZ 128
 
-static ssize_t __getdelim(char **restrict lineptr, size_t *restrict n,
-                          int delimiter, FILE *restrict stream) {
+ssize_t getdelim(char **restrict lineptr, size_t *restrict n, int delimiter,
+                 FILE *restrict stream) {
   if (lineptr == NULL || stream == NULL || n == NULL) {
     errno = EINVAL;
     return -1;
   }
 
-#if defined(IS_POSIX)
-  flockfile(stream);
-#elif defined(_WIN32)
-  _lock_file(stream);
-#endif
+  ay__flockfile(stream);
 
-#if defined(IS_POSIX)
-  int c = getc_unlocked(stream);
-#elif defined(_WIN32)
-  int c = _getc_nolock(stream);
-#else
-  int c = getc(stream);
-#endif
-
-  if (c == EOF) {
+  int c = ay__getc_unlocked(stream);
+  if (c == EOF)
     return -1;
-  }
 
   if (*lineptr == NULL) {
     *lineptr = malloc(INITIAL_BUFFSZ);
@@ -102,36 +94,18 @@ static ssize_t __getdelim(char **restrict lineptr, size_t *restrict n,
     }
 
     ((unsigned char *)(*lineptr))[pos++] = c;
-    if (c == delimiter) {
+    if (c == delimiter)
       break;
-    }
 
-#if defined(IS_POSIX)
-    c = getc_unlocked(stream);
-#elif defined(_WIN32)
-    c = _getc_nolock(stream);
-#else
-    c = getc(stream);
-#endif
+    c = ay__getc_unlocked(stream);
   }
 
   (*lineptr)[pos] = '\0';
-  return pos;
-}
 
-ssize_t getdelim(char **restrict lineptr, size_t *restrict n, int delimiter,
-                 FILE *restrict stream) {
-  ssize_t ret = __getdelim(lineptr, n, delimiter, stream);
-#if defined(IS_POSIX)
-  if (stream) {
-    funlockfile(stream);
-  }
-#elif defined(_WIN32)
-  if (stream) {
-    _unlock_file(stream);
-  }
-#endif
-  return ret;
+  if (stream)
+    ay__funlockfile(stream);
+
+  return pos;
 }
 
 ssize_t getline(char **restrict lineptr, size_t *restrict n,
@@ -139,5 +113,15 @@ ssize_t getline(char **restrict lineptr, size_t *restrict n,
   return getdelim(lineptr, n, '\n', stream);
 }
 #endif /* AY_GETDELIM_IMPLEMENTATION */
+
+#ifndef AY_GETDELIM_IMPLEMENTATION
+#include <stdio.h>
+#endif /* AY_GETDELIM_IMPLEMENTATION */
+
+ssize_t getdelim(char **restrict lineptr, size_t *restrict n, int delimiter,
+                 FILE *restrict stream);
+
+ssize_t getline(char **restrict lineptr, size_t *restrict n,
+                FILE *restrict stream);
 
 #endif /* AY_GETDELIM_H */
